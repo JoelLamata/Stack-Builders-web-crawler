@@ -16,7 +16,7 @@ def get_news():
         points = get_points(subtexts[index])
         num_comments = get_num_comments(subtexts[index])
 
-        news.append({'title': title, 'order': index, 'comments': num_comments, 'points': points})
+        news.append({'title': title, 'order': index + 1, 'comments': num_comments, 'points': points})
 
     return news
 

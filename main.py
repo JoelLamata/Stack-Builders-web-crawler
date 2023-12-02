@@ -3,20 +3,44 @@ from bs4 import BeautifulSoup
 import operator
 
 
-def get_news():
-    url = 'https://news.ycombinator.com/'
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
+# Idea from https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
+def fetch_webpage(url):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.text
+    except requests.exceptions.Timeout as timeout:
+        print("Timeout Error:", timeout)
+    except requests.exceptions.TooManyRedirects as too_many_redirects:
+        print("Timeout Error:", too_many_redirects)
+    except requests.exceptions.RequestException as e:
+        # catastrophic error. bail.
+        raise SystemExit(e)
+
+
+def parse_html(html):
+    soup = BeautifulSoup(html, 'html.parser')
     posts = soup.select('.athing')
     subtexts = soup.select('.subtext')
-    news = []
+    return posts, subtexts
 
+
+def extract_news(posts, subtexts):
+    news = []
     for index in range(len(posts)):  # The length is always 30.
         title = get_title(posts[index])
         points = get_points(subtexts[index])
         num_comments = get_num_comments(subtexts[index])
 
         news.append({'title': title, 'order': index + 1, 'comments': num_comments, 'points': points})
+    return news
+
+
+def get_news():
+    url = 'https://news.ycombinator.com/'
+    html = fetch_webpage(url)
+    posts, subtexts = parse_html(html)
+    news = extract_news(posts, subtexts)
 
     return news
 

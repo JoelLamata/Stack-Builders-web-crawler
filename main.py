@@ -2,27 +2,50 @@ import requests
 from bs4 import BeautifulSoup
 import operator
 
+
 def get_news():
     url = 'https://news.ycombinator.com/'
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     posts = soup.select('.athing')
-    metadata = soup.select('.subtext')
+    subtexts = soup.select('.subtext')
     news = []
 
     for index in range(len(posts)):
-        post = posts[index]
-        title = post.select_one('.titleline').select_one('a').get_text()
-        points = int(metadata[index].select_one('.score').get_text().split()[0])
-        comments = int(metadata[index].select('a')[-1].get_text().split()[0])
+        title = get_title(posts[index])
+        points = get_points(subtexts[index])
+        num_comments = get_num_comments(subtexts[index])
 
-        news.append({'title': title, 'order': index, 'comments': int(comments), 'points': int(points)})
+        news.append({'title': title, 'order': index, 'comments': num_comments, 'points': points})
 
     return news
+
+
+def get_title(post):
+    return post.select_one('.titleline').select_one('a').get_text()
+
+
+def get_points(subtext):
+    score = subtext.select_one('.score')
+    if score is not None:
+        return int(score.get_text().split()[0])
+    else:
+        return 0
+
+
+def get_num_comments(subtext):
+    anchors = subtext.select('a')
+    if len(anchors) == 3:
+        comments = anchors[-1].get_text()
+        if comments != 'discuss':
+            return int(anchors.split()[0])
+    return 0
+
 
 def filter_news(news, filter_func, sort_key):
     filtered_news = filter(filter_func, news)
     return sorted(filtered_news, key=operator.itemgetter(sort_key), reverse=True)
+
 
 if __name__ == '__main__':
     news = get_news()

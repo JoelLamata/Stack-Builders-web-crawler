@@ -11,7 +11,7 @@ def get_news():
     subtexts = soup.select('.subtext')
     news = []
 
-    for index in range(len(posts)):
+    for index in range(len(posts)):  # The length is always 30.
         title = get_title(posts[index])
         points = get_points(subtexts[index])
         num_comments = get_num_comments(subtexts[index])
@@ -47,17 +47,31 @@ def filter_news(news, filter_func, sort_key):
     return sorted(filtered_news, key=operator.itemgetter(sort_key), reverse=True)
 
 
+def more_than_five_words_function(new):
+    if len(new['title'].split()) > 5:
+        return True
+    else:
+        return False
+
+
+def less_than_equal_five_words_function(new):
+    if len(new['title'].split()) <= 5:
+        return True
+    else:
+        return False
+
+
 if __name__ == '__main__':
     news = get_news()
 
     # Filter all previous entries with more than five words in the title ordered by the number of comments first.
-    more_than_five_words = filter_news(news, lambda x: len(x['title'].split()) > 5, 'comments')
+    more_than_five_words = filter_news(news, more_than_five_words_function, 'comments')
     print("Entries with more than five words in the title ordered by comments:")
-    for entry in more_than_five_words:
-        print(entry)
+    for new in more_than_five_words:
+        print(new)
 
     # Filter all previous entries with less than or equal to five words in the title ordered by points.
-    less_than_equal_five_words = filter_news(news, lambda x: len(x['title'].split()) <= 5, 'points')
+    less_than_equal_five_words = filter_news(news, less_than_equal_five_words_function, 'points')
     print("\nEntries with less than or equal to five words in the title ordered by points:")
-    for entry in less_than_equal_five_words:
-        print(entry)
+    for new in less_than_equal_five_words:
+        print(new)

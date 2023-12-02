@@ -3,6 +3,14 @@ from bs4 import BeautifulSoup
 import operator
 
 
+class News:
+    def __init__(self, title, order, comments, points):
+        self.title = title
+        self.order = order
+        self.comments = comments
+        self.points = points
+
+
 # Idea from https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
 def fetch_webpage(url):
     try:
@@ -32,7 +40,7 @@ def extract_news(posts, subtexts):
         points = get_points(subtexts[index])
         num_comments = get_num_comments(subtexts[index])
 
-        news.append({'title': title, 'order': index + 1, 'comments': num_comments, 'points': points})
+        news.append(News(title, index + 1, num_comments, points))
     return news
 
 

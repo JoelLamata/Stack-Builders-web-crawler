@@ -3,12 +3,18 @@ from bs4 import BeautifulSoup
 import operator
 
 
+URL = 'https://news.ycombinator.com/'
+
+
 class News:
     def __init__(self, title, order, comments, points):
         self.title = title
         self.order = order
         self.comments = comments
         self.points = points
+
+    def __str__(self):
+        return f'Order: {self.order}, Title: "{self.title}", Points: {self.points}, Comments: {self.comments}'
 
 
 # Idea from https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
@@ -45,8 +51,7 @@ def extract_news(posts, subtexts):
 
 
 def get_news():
-    url = 'https://news.ycombinator.com/'
-    html = fetch_webpage(url)
+    html = fetch_webpage(URL)
     posts, subtexts = parse_html(html)
     news = extract_news(posts, subtexts)
 
@@ -76,18 +81,18 @@ def get_num_comments(subtext):
 
 def filter_news(news, filter_func, sort_key):
     filtered_news = filter(filter_func, news)
-    return sorted(filtered_news, key=operator.itemgetter(sort_key), reverse=True)
+    return sorted(filtered_news, key=lambda x: getattr(x, sort_key), reverse=True)
 
 
 def more_than_five_words_function(new):
-    if len(new['title'].split()) > 5:
+    if len(new.title.split()) > 5:
         return True
     else:
         return False
 
 
 def less_than_equal_five_words_function(new):
-    if len(new['title'].split()) <= 5:
+    if len(new.title.split()) <= 5:
         return True
     else:
         return False

@@ -18,6 +18,7 @@ class News:
 
 
 # Idea from https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
+# Get the response from the webpage, raise if an error occurs
 def fetch_webpage(url):
     try:
         response = requests.get(url)
@@ -32,6 +33,7 @@ def fetch_webpage(url):
         raise SystemExit(e)
 
 
+# Transform the html from the response to the posts and their subtexts
 def parse_html(html):
     soup = BeautifulSoup(html, 'html.parser')
     posts = soup.select('.athing')
@@ -39,6 +41,7 @@ def parse_html(html):
     return posts, subtexts
 
 
+# Extracts the news from the posts and subtexts
 def extract_news(posts, subtexts):
     news = []
     for index in range(len(posts)):  # The length is always 30.
@@ -50,6 +53,7 @@ def extract_news(posts, subtexts):
     return news
 
 
+# Get the news after fetching the webpage, parsing the html and extracting the news
 def get_news():
     html = fetch_webpage(URL)
     posts, subtexts = parse_html(html)
@@ -58,10 +62,12 @@ def get_news():
     return news
 
 
+# Gets the title from a post
 def get_title(post):
     return post.select_one('.titleline').select_one('a').get_text()
 
 
+# Get the points from a subtext
 def get_points(subtext):
     score = subtext.select_one('.score')
     if score is not None:
@@ -70,15 +76,17 @@ def get_points(subtext):
         return 0
 
 
+# Get the comments from a subtext
 def get_num_comments(subtext):
     anchors = subtext.select('a')
-    if len(anchors) > 1:
+    if len(anchors) > 1:    # In case there is no <a> element
         comments = anchors[-1].get_text()
-        if comments != 'discuss':
+        if comments != 'discuss':   # When there are no comments, the text is "discuss"
             return int(comments.split()[0])
     return 0
 
 
+# Filters the news with the function and the sort key
 def filter_news(news, filter_func, sort_key):
     filtered_news = filter(filter_func, news)
     return sorted(filtered_news, key=lambda x: getattr(x, sort_key), reverse=True)

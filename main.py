@@ -72,10 +72,10 @@ def get_points(subtext):
 
 def get_num_comments(subtext):
     anchors = subtext.select('a')
-    if len(anchors) == 3:
+    if len(anchors) > 1:
         comments = anchors[-1].get_text()
         if comments != 'discuss':
-            return int(anchors.split()[0])
+            return int(comments.split()[0])
     return 0
 
 
